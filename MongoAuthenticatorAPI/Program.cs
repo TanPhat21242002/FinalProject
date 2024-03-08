@@ -1,5 +1,4 @@
-﻿using System.Text;
-using AspNetCore.Identity.MongoDbCore.Extensions;
+﻿using AspNetCore.Identity.MongoDbCore.Extensions;
 using AspNetCore.Identity.MongoDbCore.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -7,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using MongoAuthenticatorAPI.Models;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +22,7 @@ var mongoDbIdentityConfig = new MongoDbIdentityConfiguration
     MongoDbSettings = new MongoDbSettings
     {
         ConnectionString = "mongodb://localhost:27017",
-        DatabaseName = "youtubemongodb"
+        DatabaseName = "FinalProject"
     },
     IdentityOptionsAction = options =>
     {
