@@ -26,47 +26,41 @@ namespace MongoAuthenticatorAPI.Controllers
         }
 
         [HttpPost]
-        [Route("roles/add")]
-        public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest request)
-        {
-            var appRole = new ApplicationRole { Name = request.Role };
-            var createRole = await _roleManager.CreateAsync(appRole);
-
-            return Ok(new { message = "role created succesfully" });
-        }
-
-        [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        public async Task<IActionResult> Register([FromBody] UserDTO user)
         {
-            var result = await RegisterAsync(request);
+            var result = await RegisterAsync(user);
 
             return result.Success ? Ok(result) : BadRequest(result.Message);
 
         }
 
-        private async Task<RegisterResponse> RegisterAsync(RegisterRequest request)
+        private async Task<RegisterResponse> RegisterAsync(UserDTO user)
         {
             try
             {
-                var userExists = await _userManager.FindByEmailAsync(request.Email);
+                var userExists = await _userManager.FindByEmailAsync(user.Email);
                 if (userExists != null)
                     return new RegisterResponse { Message = "User already exists", Success = false };
 
                 userExists = new ApplicationUser
                 {
-                    FullName = request.FullName,
-                    Email = request.Email,
+                    FullName = user.FullName,
+                    Email = user.Email,
                     ConcurrencyStamp = Guid.NewGuid().ToString(),
-                    UserName = request.Email,
+                    UserName = user.Email,
 
                 };
-                var createUserResult = await _userManager.CreateAsync(userExists, request.Password);
-                if (!createUserResult.Succeeded) return new RegisterResponse { Message = $"Create user failed {createUserResult?.Errors?.First()?.Description}", Success = false };
+
+                var createUserResult = await _userManager.CreateAsync(userExists, user.Password);
+                if (!createUserResult.Succeeded)
+                    return new RegisterResponse { Message = $"Create user failed {createUserResult?.Errors?.First()?.Description}", Success = false };
                 //user is created...
                 //then add user to a role...
+
                 var addUserToRoleResult = await _userManager.AddToRoleAsync(userExists, "USER");
-                if (!addUserToRoleResult.Succeeded) return new RegisterResponse { Message = $"Create user succeeded but could not add user to role {addUserToRoleResult?.Errors?.First()?.Description}", Success = false };
+                if (!addUserToRoleResult.Succeeded)
+                    return new RegisterResponse { Message = $"Create user succeeded but could not add user to role {addUserToRoleResult?.Errors?.First()?.Description}", Success = false };
 
                 //all is still well..
                 return new RegisterResponse

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MongoAuthenticatorAPI.Dtos
 {
-    public class RegisterRequest
+    public class UserDTO
     {
         [Required, EmailAddress]
         public string Email { get; set; } = string.Empty;
