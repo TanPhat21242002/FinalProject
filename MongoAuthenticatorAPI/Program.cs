@@ -4,6 +4,7 @@ using AspNetCore.Identity.MongoDbCore.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using MongoAuthenticatorAPI.Middlewares;
 using MongoAuthenticatorAPI.Models;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
@@ -85,12 +86,22 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseRouting();
+
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
 
+app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/v1/validate/token"), builder =>
+{
+	builder.UseMiddleware<UserTokenValidation>();
+});
+
 app.MapControllers();
 
 app.Run();
+
+
 

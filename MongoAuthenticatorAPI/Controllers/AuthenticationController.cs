@@ -58,10 +58,10 @@ namespace MongoAuthenticatorAPI.Controllers
                 //user is created...
                 //then add user to a role...
 
-                var addUserToRoleResult = await _userManager.AddToRoleAsync(userExists, "USER");
+                /*var addUserToRoleResult = await _userManager.AddToRoleAsync(userExists, "USER");
                 if (!addUserToRoleResult.Succeeded)
                     return new RegisterResponse { Message = $"Create user succeeded but could not add user to role {addUserToRoleResult?.Errors?.First()?.Description}", Success = false };
-
+*/
                 //all is still well..
                 return new RegisterResponse
                 {
@@ -100,7 +100,7 @@ namespace MongoAuthenticatorAPI.Controllers
 
                 var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
                 if (!result.Succeeded)
-                    return new LoginResponse { Message = "Wrong password", Success = false };
+                    return new LoginResponse { Message = "Invalid email/password", Success = false };
 
                 var claims = new List<Claim>
             {
