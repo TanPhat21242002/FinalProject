@@ -15,15 +15,13 @@ namespace MongoAuthenticatorAPI.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
 		private readonly IConfiguration _config;
 
-		public AuthenticationController(IConfiguration config, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager)
+		public AuthenticationController(IConfiguration config, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
             _signInManager = signInManager;
             _config = config;
         }
@@ -115,9 +113,9 @@ namespace MongoAuthenticatorAPI.Controllers
                 var roleClaims = roles.Select(x => new Claim(ClaimTypes.Role, x));
                 claims.AddRange(roleClaims);*/
 
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("1swek3u4uo2u4a6e"));
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-                var expires = DateTime.Now.AddMinutes(30);
+                var expires = DateTime.Now.AddHours(1);
 
                 var token = new JwtSecurityToken(
 					issuer: _config["Jwt:Issuer"],
@@ -144,6 +142,7 @@ namespace MongoAuthenticatorAPI.Controllers
 
 
         }
-    }
+
+	}
 }
 
