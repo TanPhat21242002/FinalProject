@@ -17,9 +17,12 @@ namespace MongoAuthenticatorAPI.Middlewares
 		private readonly RequestDelegate _next;
 		private const string ApiKeyFromBodyFieldName = "jwtToken"; // Tên trường chứa API key trong body
 
-		public UserTokenValidation(RequestDelegate next)
+		private readonly IConfiguration _config;
+
+		public UserTokenValidation(RequestDelegate next, IConfiguration config)
 		{
 			_next = next;
+			_config = config;
 		}
 
 		public async Task Invoke(HttpContext context)
@@ -111,9 +114,9 @@ namespace MongoAuthenticatorAPI.Middlewares
 
 			SecurityToken validatedToken;
 
-			validationParameters.ValidIssuer = "https://localhost:5001";
-			validationParameters.ValidAudience = "https://localhost:5001";
-			validationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("1swek3u4uo2u4a6e"));
+			validationParameters.ValidIssuer = _config["Jwt:Issuer"];
+			validationParameters.ValidAudience = _config["Jwt:Audience"];
+			validationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
 			try
 			{
 				ClaimsPrincipal principal = tokenHandler.ValidateToken(apiKey, validationParameters, out validatedToken);

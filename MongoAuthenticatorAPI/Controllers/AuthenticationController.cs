@@ -18,11 +18,14 @@ namespace MongoAuthenticatorAPI.Controllers
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public AuthenticationController(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager)
+		private readonly IConfiguration _config;
+
+		public AuthenticationController(IConfiguration config, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
+            _config = config;
         }
 
         [HttpPost]
@@ -104,26 +107,24 @@ namespace MongoAuthenticatorAPI.Controllers
 
                 var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                new Claim(ClaimTypes.Name, user.FullName),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Role,"USER"),
             };
-                var roles = await _userManager.GetRolesAsync(user);
+                /*var roles = await _userManager.GetRolesAsync(user);
                 var roleClaims = roles.Select(x => new Claim(ClaimTypes.Role, x));
-                claims.AddRange(roleClaims);
+                claims.AddRange(roleClaims);*/
 
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("1swek3u4uo2u4a6e"));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
                 var expires = DateTime.Now.AddMinutes(30);
 
                 var token = new JwtSecurityToken(
-                    issuer: "https://localhost:5001",
-                    audience: "https://localhost:5001",
+					issuer: _config["Jwt:Issuer"],
+                    audience: _config["Jwt:Audience"],
                     claims: claims,
                     expires: expires,
                     signingCredentials: creds
-
                     );
 
                 return new LoginResponse
